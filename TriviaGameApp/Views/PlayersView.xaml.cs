@@ -24,13 +24,7 @@ public partial class PlayersView : ContentPage
         PlayerNamesContainer.Children.Clear();
         _playerNameEntries.Clear();
 
-        int selectedCount = (int)PlayerCountPicker.SelectedItem;
-
-        var resources = Application.Current!.Resources;
-        var light = (Color)resources["Primary"];
-        var dark = (Color)resources["Primary_Dark"];
-        var lightBrush = (Brush)resources["PrimaryBrush"];
-        var darkBrush = (Brush)resources["PrimaryBrush_Dark"];
+        if (PlayerCountPicker.SelectedItem is not int selectedCount) return;
 
         for (int i = 1; i <= selectedCount; i++)
         {
@@ -47,33 +41,19 @@ public partial class PlayersView : ContentPage
             {
                 Placeholder = $"Player {i} Name (プレイヤー {i} 名前)",
                 HorizontalOptions = LayoutOptions.Fill,
-                Style = new Style(typeof(Entry))
-                {
-                    Setters =
-                    {
-                        new Setter { Property = Entry.FontFamilyProperty, Value = "Yu Mincho, 'MS Mincho', serif" },
-                        new Setter { Property = Entry.BackgroundColorProperty, Value = Colors.Transparent },
-                        new Setter { Property = Entry.FontSizeProperty, Value = 16.0 },
-                        new Setter { Property = Entry.PlaceholderColorProperty, Value = Colors.Gray },
-                        new Setter { Property = Entry.MinimumWidthRequestProperty, Value = 200.0 },
-                        new Setter { Property = Entry.HorizontalTextAlignmentProperty, Value = TextAlignment.Center },
-                        new Setter { Property = Entry.MarginProperty, Value = new Thickness(0, 5) }
-                    }
-                }
+                Style = (Style)Resources["PlayerNameStyle"]
             };
-
-            entry.SetAppThemeColor(Entry.TextColorProperty, light, dark);
 
             var border = new Border
             {
                 Content = entry,
+                Style = (Style)Resources["PlayerBorderStyle"],
                 StrokeThickness = 1,
                 StrokeShape = new RoundRectangle { CornerRadius = 0 },
                 Padding = new Thickness(10, 5),
                 HorizontalOptions = LayoutOptions.Center
             };
 
-            border.SetAppTheme(Border.StrokeProperty, lightBrush, darkBrush);
             containerGrid.Add(border);
             _playerNameEntries.Add(entry);
             PlayerNamesContainer.Children.Add(containerGrid);
@@ -82,6 +62,7 @@ public partial class PlayersView : ContentPage
             {
                 var line = new Line
                 {
+                    Style = (Style)Resources["PlayerDividerStyle"],
                     X1 = 0,
                     Y1 = 0,
                     X2 = 100,
@@ -90,7 +71,6 @@ public partial class PlayersView : ContentPage
                     HorizontalOptions = LayoutOptions.Center,
                     Margin = new Thickness(0, 10)
                 };
-                line.SetAppTheme(Line.StrokeProperty, lightBrush, darkBrush);
                 PlayerNamesContainer.Children.Add(line);
             }
         }
@@ -126,6 +106,6 @@ public partial class PlayersView : ContentPage
 
     private bool ValidatePlayerNames()
     {
-        return _playerNameEntries.All(entry => !string.IsNullOrWhiteSpace(entry.Text));
+        return _playerNameEntries.Count > 0 && _playerNameEntries.All(entry => !string.IsNullOrWhiteSpace(entry.Text));
     }
 }

@@ -44,7 +44,7 @@
             <Grid 
                 RowSpacing="20" 
                 ColumnSpacing="15" 
-                RowDefinitions="Auto,Auto,Auto,Auto,Auto"
+                RowDefinitions="Auto,Auto,Auto,Auto"
                 ColumnDefinitions="Auto,*,Auto,*"
                 HorizontalOptions="CenterAndExpand"
                 MaximumWidthRequest="600">
@@ -119,7 +119,6 @@
 
                 <Border 
                     Grid.Row="2" 
-                    Grid.RowSpan="2"
                     Grid.ColumnSpan="4"
                     Stroke="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource Primary_Dark}}"
                     StrokeThickness="1"
@@ -152,7 +151,7 @@
                 </Border>
 
                 <Button 
-                    Grid.Row="4" 
+                    Grid.Row="3"
                     Grid.Column="0" 
                     Grid.ColumnSpan="4"
                     Text="Save Settings (設定を保存)"

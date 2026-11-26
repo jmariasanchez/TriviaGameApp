@@ -7,6 +7,22 @@
 
     <ContentPage.Resources>
         <ResourceDictionary>
+            <Style x:Key="PlayerNameStyle" TargetType="Entry">
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource Primary_Dark}}" />
+                <Setter Property="FontFamily" Value="Yu Mincho, 'MS Mincho', serif" />
+                <Setter Property="BackgroundColor" Value="Transparent" />
+                <Setter Property="FontSize" Value="16" />
+                <Setter Property="PlaceholderColor" Value="Gray" />
+                <Setter Property="MinimumWidthRequest" Value="200" />
+                <Setter Property="HorizontalTextAlignment" Value="Center" />
+                <Setter Property="Margin" Value="0,5" />
+            </Style>
+            <Style x:Key="PlayerBorderStyle" TargetType="Border">
+                <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource PrimaryBrush}, Dark={StaticResource PrimaryBrush_Dark}}" />
+            </Style>
+            <Style x:Key="PlayerDividerStyle" TargetType="Line">
+                <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource PrimaryBrush}, Dark={StaticResource PrimaryBrush_Dark}}" />
+            </Style>
             <Style x:Key="JapaneseTitleStyle" TargetType="Label">
                 <Setter Property="FontFamily" Value="Yu Mincho, 'MS Mincho', serif" />
                 <Setter Property="FontSize" Value="28" />
