@@ -1,6 +1,16 @@
 # Trivia Game (トリビアゲーム)
 
-I started this trivia game in 2023. One to four players share a device and take turns racing the clock. I built the interface in C# and XAML with .NET MAUI, pairing English and Japanese labels with light and dark themes. The Git history for this version begins in December 2024, with updates through January 2025.
+I started this trivia game in 2023. One to four players share a device and take turns racing the clock. I built the interface in C# and XAML with .NET MAUI, pairing English and Japanese labels in a light theme. The Git history for the original implementation runs from December 2024 to January 2025.
+
+## Demo
+
+[Watch a two-player round (MP4)](docs/demo/walkthrough.mp4) · [Browse every captured state](docs/demo/README.md)
+
+| Set up the players | Beat the clock | Compare scores |
+| :---: | :---: | :---: |
+| [![Player setup with Emi and Kai](docs/demo/05-players.webp)](docs/demo/05-players.webp) | [![A live question with answers and a countdown](docs/demo/06-question.webp)](docs/demo/06-question.webp) | [![Local leaderboard after the round](docs/demo/13-leaderboard.webp)](docs/demo/13-leaderboard.webp) |
+
+Captured in Light mode on an iPad Pro simulator. The game no longer follows the device's appearance: Light is the default, and Dark is an explicit choice in **Settings**.
 
 ## Play a round
 
@@ -25,6 +35,27 @@ dotnet build TriviaGameApp/TriviaGameApp.csproj -t:Run -f net8.0-maccatalyst -p:
 ```
 
 The [project file](TriviaGameApp/TriviaGameApp.csproj) also declares `net8.0-android`, `net8.0-ios`, and, on Windows, `net8.0-windows10.0.19041.0`.
+
+<details>
+<summary>Run on an iPad simulator (Apple silicon)</summary>
+
+Install an iPad simulator runtime in Xcode. List the available devices, copy an iPad's UDID, then run:
+
+```sh
+dotnet workload install maui-ios
+xcrun simctl list devices available
+```
+
+```sh
+UDID="your-ipad-simulator-udid"
+dotnet build TriviaGameApp/TriviaGameApp.csproj -t:Run -f net8.0-ios \
+  -p:TargetFrameworks=net8.0-ios -p:RuntimeIdentifier=iossimulator-arm64 \
+  -p:_DeviceName=":v2:udid=$UDID"
+```
+
+The demo was built with .NET SDK 8.0.428 and played on an 11-inch iPad Pro (M4) simulator running iOS 18.5. No API key or account is needed.
+
+</details>
 
 ## Credits and license
 
