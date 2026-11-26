@@ -1,69 +1,31 @@
-# TriviaGameApp
+# Trivia Game (トリビアゲーム)
 
-TriviaGameApp is a cross-platform trivia game application built using .NET MAUI. It supports Android, iOS, MacCatalyst, and Windows platforms.
+I started this trivia game in 2023. One to four players share a device and take turns racing the clock. I built the interface in C# and XAML with .NET MAUI, pairing English and Japanese labels with light and dark themes. The Git history for this version begins in December 2024, with updates through January 2025.
 
-## Features
+## Play a round
 
-- Cross-platform support (Android, iOS, MacCatalyst, Windows)
-- Interactive trivia questions
-- Leaderboard to track high scores
-- Integration with Open Trivia Database (OpenTDB)
+1. Open **Settings** to choose a category, difficulty, question type (multiple choice or true/false), and number of questions per player. The default is 10 questions per player with no filters.
+2. Choose **New Game**, select the number of players, and enter their names. An internet connection is needed to load the questions.
+3. Each player finishes their questions before passing the device. Answer within 30 seconds or choose **Skip**. Correct answers earn 1 point on easy, 2 on medium, and 3 on hard.
+4. Dismiss **Game Over!** to see the local leaderboard. Search by player name or filter by category and difficulty to compare scores across rounds.
 
-## Getting Started
+For a short first game, try two players and two questions each. Keep the total (players × questions per player) at 50 or fewer, the [Open Trivia DB request limit](https://opentdb.com/api_config.php). If a round ends without questions, check the connection and try a broader category or difficulty.
 
-### Prerequisites
+## How it works
 
-- .NET 8.0 SDK
-- Visual Studio 2022 or later with .NET MAUI workload installed
+[`TriviaService`](TriviaGameApp/Services/TriviaService.cs) requests the whole group's questions in one call and decodes HTML entities in the text. [`GamePage`](TriviaGameApp/Views/GamePage.xaml.cs) divides the questions among players and handles the timer and scoring. The app stores scores in `leaderboard.json` and settings in `trivia_settings.json` in the app data directory. Settings also use MAUI Preferences as a fallback.
 
-### Installation
+## Run locally
 
-1. Clone the repository:
+Use the .NET 8 SDK, the MAUI workload for your target, and its platform toolchain. For example, to run the Mac Catalyst target on a Mac with compatible Xcode installed, start in the repository root:
 
-    ```sh
-    git clone https://github.com/copydataai/TriviaGameApp.git
-    ```
+```sh
+dotnet workload install maui-maccatalyst
+dotnet build TriviaGameApp/TriviaGameApp.csproj -t:Run -f net8.0-maccatalyst -p:TargetFrameworks=net8.0-maccatalyst
+```
 
-2. Navigate to the project directory:
+The [project file](TriviaGameApp/TriviaGameApp.csproj) also declares `net8.0-android`, `net8.0-ios`, and, on Windows, `net8.0-windows10.0.19041.0`.
 
-    ```sh
-    cd TriviaGameApp
-    ```
+## Credits and license
 
-3. Restore the project dependencies:
-
-    ```sh
-    dotnet restore
-    ```
-
-### Running the App
-
-To run the app on a specific platform, use the following commands:
-
-- Android:
-
-    ```sh
-    dotnet build -t:Run -f net8.0-android
-    ```
-
-- iOS:
-
-    ```sh
-    dotnet build -t:Run -f net8.0-ios
-    ```
-
-- MacCatalyst:
-
-    ```sh
-    dotnet build -t:Run -f net8.0-maccatalyst
-    ```
-
-- Windows:
-
-    ```sh
-    dotnet build -t:Run -f net8.0-windows10.0.19041.0
-    ```
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE.txt](http://_vscodecontentref_/1) file for details.
+Questions and answers come from the [Open Trivia Database](https://opentdb.com/) under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). The application code is distributed under the [MIT License](LICENSE.txt).
