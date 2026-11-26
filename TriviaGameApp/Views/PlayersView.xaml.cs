@@ -26,6 +26,12 @@ public partial class PlayersView : ContentPage
 
         int selectedCount = (int)PlayerCountPicker.SelectedItem;
 
+        var resources = Application.Current!.Resources;
+        var light = (Color)resources["Primary"];
+        var dark = (Color)resources["Primary_Dark"];
+        var lightBrush = (Brush)resources["PrimaryBrush"];
+        var darkBrush = (Brush)resources["PrimaryBrush_Dark"];
+
         for (int i = 1; i <= selectedCount; i++)
         {
             var containerGrid = new Grid
@@ -47,9 +53,6 @@ public partial class PlayersView : ContentPage
                     {
                         new Setter { Property = Entry.FontFamilyProperty, Value = "Yu Mincho, 'MS Mincho', serif" },
                         new Setter { Property = Entry.BackgroundColorProperty, Value = Colors.Transparent },
-                        new Setter { Property = Entry.TextColorProperty, Value = Application.Current.RequestedTheme == AppTheme.Dark ? 
-                            (Color)Application.Current.Resources["Primary_Dark"] : 
-                            (Color)Application.Current.Resources["Primary"] },
                         new Setter { Property = Entry.FontSizeProperty, Value = 16.0 },
                         new Setter { Property = Entry.PlaceholderColorProperty, Value = Colors.Gray },
                         new Setter { Property = Entry.MinimumWidthRequestProperty, Value = 200.0 },
@@ -59,18 +62,18 @@ public partial class PlayersView : ContentPage
                 }
             };
 
+            entry.SetAppThemeColor(Entry.TextColorProperty, light, dark);
+
             var border = new Border
             {
                 Content = entry,
-                Stroke = Application.Current.RequestedTheme == AppTheme.Dark ? 
-                    (Color)Application.Current.Resources["Primary_Dark"] : 
-                    (Color)Application.Current.Resources["Primary"],
                 StrokeThickness = 1,
                 StrokeShape = new RoundRectangle { CornerRadius = 0 },
                 Padding = new Thickness(10, 5),
                 HorizontalOptions = LayoutOptions.Center
             };
 
+            border.SetAppTheme(Border.StrokeProperty, lightBrush, darkBrush);
             containerGrid.Add(border);
             _playerNameEntries.Add(entry);
             PlayerNamesContainer.Children.Add(containerGrid);
@@ -83,13 +86,11 @@ public partial class PlayersView : ContentPage
                     Y1 = 0,
                     X2 = 100,
                     Y2 = 0,
-                    Stroke = Application.Current.RequestedTheme == AppTheme.Dark ? 
-                        (Color)Application.Current.Resources["Primary_Dark"] : 
-                        (Color)Application.Current.Resources["Primary"],
                     StrokeThickness = 1,
                     HorizontalOptions = LayoutOptions.Center,
                     Margin = new Thickness(0, 10)
                 };
+                line.SetAppTheme(Line.StrokeProperty, lightBrush, darkBrush);
                 PlayerNamesContainer.Children.Add(line);
             }
         }

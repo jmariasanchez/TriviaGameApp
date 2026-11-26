@@ -14,7 +14,6 @@ namespace TriviaGameApp.Views
         // We'll define theme modes as a simple list of strings
         private List<string> _themeOptions = new()
         {
-            "System",
             "Light",
             "Dark"
         };
