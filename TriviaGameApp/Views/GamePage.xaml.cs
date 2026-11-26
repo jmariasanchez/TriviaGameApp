@@ -16,7 +16,8 @@ namespace TriviaGameApp.Views
 
         private DateTime _gameStartTime;
         private int _timeLeft;
-        private bool _timerRunning = false;
+        private Microsoft.Maui.Dispatching.IDispatcherTimer? _timer;
+        private int _pageVersion;
 
         private bool _gameEnded = false;  
 
@@ -28,6 +29,8 @@ namespace TriviaGameApp.Views
         protected override async void OnAppearing()
         {
             base.OnAppearing();
+            int version = ++_pageVersion;
+            StopTimer();
             _gameStartTime = DateTime.Now;
 
             GameState.TimeLimitInSeconds = 30;
@@ -35,11 +38,13 @@ namespace TriviaGameApp.Views
             if (GameState.Players == null || GameState.Players.Count == 0)
             {
                 await DisplayAlert("Error", "No players found. Returning to start.", "OK");
+                if (version != _pageVersion) return;
                 await Shell.Current.GoToAsync("//StartPage");
                 return;
             }
 
             List<TriviaQuestion> fetched = await _triviaService.FetchTriviaAsync(GameState.Players.Count);
+            if (version != _pageVersion) return;
             int questionsPerPlayer = fetched.Count / GameState.Players.Count;
             int remainingQuestions = fetched.Count % GameState.Players.Count;
 
@@ -95,6 +100,8 @@ namespace TriviaGameApp.Views
             var question = questions[_currentQuestionIndex];
             QuestionLabel.Text = question.Question;
 
+            var timer = Dispatcher.CreateTimer();
+            _timer = timer;
             AnswersContainer.Children.Clear();
             foreach (var answer in question.AllAnswers)
             {
@@ -103,16 +110,25 @@ namespace TriviaGameApp.Views
                     Text = answer,
                     Style = (Style)Resources["JapaneseButtonStyle"]
                 };
-                answerButton.Clicked += (s, e) => OnAnswerSelected(answer, question);
+                answerButton.Clicked += async (s, e) =>
+                {
+                    if (_timer == timer) await FinishQuestionAsync(question, answer);
+                };
                 AnswersContainer.Children.Add(answerButton);
             }
 
-            StartTimer();
+            _timeLeft = GameState.TimeLimitInSeconds;
+            UpdateTimerLabel();
+            timer.Interval = TimeSpan.FromSeconds(1);
+            timer.Tick += OnTimerTick;
+            timer.Start();
         }
 
-        private void OnAnswerSelected(string chosenAnswer, TriviaQuestion question)
+        private async Task FinishQuestionAsync(TriviaQuestion? question = null, string? answer = null, bool timedOut = false)
         {
-            _timerRunning = false;
+            if (_timer == null) return;
+            int version = _pageVersion;
+            StopTimer();
 
             foreach (var view in AnswersContainer.Children)
             {
@@ -120,18 +136,22 @@ namespace TriviaGameApp.Views
                     btn.IsEnabled = false;
             }
 
-            bool isCorrect = chosenAnswer == question.CorrectAnswer;
-            if (isCorrect)
+            if (timedOut)
+            {
+                await DisplayAlert("Time's Up!", "You ran out of time.", "OK");
+            }
+            else if (question != null && answer == question.CorrectAnswer)
             {
                 int points = GetPointsForDifficulty(question.Difficulty);
                 GameState.Players[_currentPlayerIndex].Score += points;
-                DisplayAlert("Correct!", $"You earned {points} points.", "OK");
+                await DisplayAlert("Correct!", $"You earned {points} points.", "OK");
             }
-            else
+            else if (question != null)
             {
-                DisplayAlert("Incorrect!", "Better luck next time.", "OK");
+                await DisplayAlert("Incorrect!", "Better luck next time.", "OK");
             }
 
+            if (version != _pageVersion) return;
             _currentQuestionIndex++;
             LoadQuestion();
         }
@@ -147,34 +167,28 @@ namespace TriviaGameApp.Views
             }
         }
 
-        private void StartTimer()
+        private async void OnTimerTick(object? sender, EventArgs e)
         {
-            _timeLeft = GameState.TimeLimitInSeconds; 
-            _timerRunning = true;
+            if (_timer == null || sender != _timer) return;
+            _timeLeft--;
             UpdateTimerLabel();
-
-            Dispatcher.StartTimer(TimeSpan.FromSeconds(1), () =>
-            {
-                if (!_timerRunning) return false;
-
-                _timeLeft--;
-                UpdateTimerLabel();
-
-
-                if (_timeLeft <= 0)
-                {
-                    _timerRunning = false;
-                    DisplayAlert("Time's Up!", "You ran out of time.", "OK");
-
-                    _currentQuestionIndex++;
-                    LoadQuestion();
-                    return false; 
-                }
-
-                return true; 
-            });
+            if (_timeLeft <= 0) await FinishQuestionAsync(timedOut: true);
         }
 
+        private void StopTimer()
+        {
+            if (_timer == null) return;
+            _timer.Tick -= OnTimerTick;
+            _timer.Stop();
+            _timer = null;
+        }
+
+        protected override void OnDisappearing()
+        {
+            _pageVersion++;
+            StopTimer();
+            base.OnDisappearing();
+        }
 
         private void UpdateTimerLabel()
         {
@@ -183,16 +197,7 @@ namespace TriviaGameApp.Views
 
         private async void OnSkipClicked(object sender, EventArgs e)
         {
-            _timerRunning = false;
-
-            foreach (var view in AnswersContainer.Children)
-            {
-                if (view is Button btn)
-                    btn.IsEnabled = false;
-            }
-
-            _currentQuestionIndex++;
-            LoadQuestion();
+            await FinishQuestionAsync();
         }
 
         private async void EndGame()
@@ -235,7 +240,9 @@ namespace TriviaGameApp.Views
             {
                 resultMessage += $"{p.Name}: {p.Score}\n";
             }
+            int version = _pageVersion;
             await DisplayAlert("Game Over!", resultMessage, "OK");
+            if (version != _pageVersion) return;
 
             await Shell.Current.GoToAsync("LeaderboardPage");
         }
